@@ -1,31 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Person Class Hierarchy</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Person Hierarchy — Student & Teacher Demo</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#3b82f6;
+      --danger:#ef4444;
+      --success:#10b981;
+      --glass: rgba(255,255,255,0.6);
+      font-size: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      color:#111827;
+      padding:24px;
+    }
+    header{max-width:1100px;margin:0 auto 18px;display:flex;align-items:center;gap:18px}
+    header h1{margin:0;font-size:1.25rem}
+    header p{margin:0;color:var(--muted);font-size:0.95rem}
+
+    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:20px}
+
+    .panel{
+      background:var(--card);
+      border-radius:12px;
+      padding:16px;
+      box-shadow:0 6px 20px rgba(15,23,42,0.06);
+    }
+
+    /* form */
+    form .row{display:flex;gap:8px;margin-bottom:10px}
+    label{display:block;font-size:0.88rem;color:var(--muted);margin-bottom:6px}
+    input[type="text"], input[type="number"], select{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:transparent;font-size:0.95rem
+    }
+    .small{font-size:0.82rem;color:var(--muted)}
+    button{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+    button.danger{background:var(--danger)}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(59,130,246,0.15)}
+
+    /* people list */
+    #controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    #search{flex:1}
+    .card-person{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;border:1px solid #f1f5f9;margin-bottom:10px}
+    .meta{display:flex;flex-direction:column}
+    .role{font-weight:600}
+    .age{font-size:0.86rem;color:var(--muted)}
+    .badge{padding:6px 10px;border-radius:999px;font-size:0.78rem}
+    .badge.student{background:linear-gradient(90deg,#dbeafe,#bfdbfe);color:#1e3a8a}
+    .badge.teacher{background:linear-gradient(90deg,#e6fffa,#bbf7d0);color:#065f46}
+    .actions{display:flex;gap:8px}
+    .log{height:140px;overflow:auto;background:linear-gradient(180deg, rgba(15,23,42,0.02), rgba(15,23,42,0.01));padding:10px;border-radius:8px;border:1px dashed #e6eefb;font-family:monospace;font-size:0.94rem}
+
+    @media (max-width:880px){
+      .wrap{grid-template-columns:1fr;}
+    }
+
+    footer{max-width:1100px;margin:16px auto 0;text-align:center;color:var(--muted);font-size:0.9rem}
+  </style>
 </head>
 <body>
-  <h2>Person Class Hierarchy Demo</h2>
-  <pre id="output"></pre>
+  <header>
+    <h1>Person Hierarchy — Student & Teacher</h1>
+    <p>Demonstrates inheritance with interactive UI. Add people, call methods, and remove entries.</p>
+  </header>
+
+  <main class="wrap">
+    <!-- left: form + log -->
+    <section class="panel">
+      <h2 style="margin-top:0">Create Person</h2>
+      <form id="person-form">
+        <div class="row">
+          <div style="flex:1">
+            <label for="type">Type</label>
+            <select id="type">
+              <option value="Student">Student</option>
+              <option value="Teacher">Teacher</option>
+              <option value="Person">Person</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="flex:1">
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="E.g. Alice" required />
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="flex:1">
+            <label for="age">Age</label>
+            <input id="age" type="number" placeholder="E.g. 20" min="1" required />
+          </div>
+        </div>
+
+        <div id="extra-fields"></div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="submit">Add</button>
+          <button type="button" id="seed" class="ghost">Add sample data</button>
+          <button type="button" id="clear" class="danger">Clear all</button>
+        </div>
+      </form>
+
+      <hr style="margin:16px 0;border:none;border-top:1px solid #f1f5f9" />
+
+      <h3 style="margin:0 0 8px 0">Output Log</h3>
+      <div id="log" class="log"></div>
+    </section>
+
+    <!-- right: list -->
+    <section>
+      <div class="panel">
+        <div id="controls">
+          <input id="search" type="text" placeholder="Search by name..." />
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="small" id="count">0 people</span>
+          </div>
+        </div>
+
+        <div id="people-list"></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="panel">
+        <h3 style="margin-top:0">Help</h3>
+        <ul style="margin:0 0 0 18px;color:var(--muted)">
+          <li>Create Student/Teacher/Person with the form.</li>
+          <li>Use the action buttons to call <code>introduce()</code>, <code>study()</code>, or <code>teach()</code>.</li>
+          <li>Data is saved in your browser (localStorage).</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Built with ES6 classes • You can request a Java class file version if you want.
+  </footer>
 
   <script>
-    // Base class
+    /***** Class hierarchy *****/
     class Person {
-      constructor(name, age) {
+      constructor(id, name, age) {
+        this.id = id;
         this.name = name;
-        this.age = age;
+        this.age = Number(age);
       }
 
       introduce() {
         return `Hi, I'm ${this.name}, ${this.age} years old.`;
       }
+
+      serialize() {
+        return { type: 'Person', id: this.id, name: this.name, age: this.age };
+      }
     }
 
-    // Student subclass
     class Student extends Person {
-      constructor(name, age, grade) {
-        super(name, age); // call parent constructor
+      constructor(id, name, age, grade) {
+        super(id, name, age);
         this.grade = grade;
       }
 
@@ -36,12 +179,15 @@
       introduce() {
         return super.introduce() + ` I am a student in grade ${this.grade}.`;
       }
+
+      serialize() {
+        return { type: 'Student', id: this.id, name: this.name, age: this.age, grade: this.grade };
+      }
     }
 
-    // Teacher subclass
     class Teacher extends Person {
-      constructor(name, age, subject) {
-        super(name, age);
+      constructor(id, name, age, subject) {
+        super(id, name, age);
         this.subject = subject;
       }
 
@@ -52,21 +198,229 @@
       introduce() {
         return super.introduce() + ` I teach ${this.subject}.`;
       }
+
+      serialize() {
+        return { type: 'Teacher', id: this.id, name: this.name, age: this.age, subject: this.subject };
+      }
     }
 
-    // Example usage
-    const output = document.getElementById("output");
+    /***** App state and persistence *****/
+    const STORAGE_KEY = 'person_hierarchy_data_v1';
 
-    const student1 = new Student("Alice", 16, "10th");
-    const teacher1 = new Teacher("Mr. Smith", 40, "Mathematics");
+    let people = [];
 
-    let text = "";
-    text += student1.introduce() + "\\n";
-    text += student1.study() + "\\n\\n";
-    text += teacher1.introduce() + "\\n";
-    text += teacher1.teach();
+    function save() {
+      const data = people.map(p => p.serialize());
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
-    output.textContent = text;
+    function load() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const arr = JSON.parse(raw);
+        people = arr.map(obj => {
+          if (obj.type === 'Student') return new Student(obj.id, obj.name, obj.age, obj.grade);
+          if (obj.type === 'Teacher') return new Teacher(obj.id, obj.name, obj.age, obj.subject);
+          return new Person(obj.id, obj.name, obj.age);
+        });
+      } catch (e) {
+        console.error('Failed to parse stored data', e);
+      }
+    }
+
+    /***** Utilities *****/
+    function uid(prefix = '') {
+      return prefix + Math.random().toString(36).slice(2, 9);
+    }
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      el.textContent = `[${time}] ${msg}\n` + el.textContent;
+    }
+
+    /***** DOM & render *****/
+    const form = document.getElementById('person-form');
+    const typeEl = document.getElementById('type');
+    const nameEl = document.getElementById('name');
+    const ageEl = document.getElementById('age');
+    const extraEl = document.getElementById('extra-fields');
+    const peopleList = document.getElementById('people-list');
+    const searchEl = document.getElementById('search');
+    const countEl = document.getElementById('count');
+
+    function renderExtraFields() {
+      const t = typeEl.value;
+      extraEl.innerHTML = '';
+      if (t === 'Student') {
+        extraEl.innerHTML = `
+          <div class="row">
+            <div style="flex:1">
+              <label for="grade">Grade</label>
+              <input id="grade" type="text" placeholder="E.g. 10th" />
+            </div>
+          </div>`;
+      } else if (t === 'Teacher') {
+        extraEl.innerHTML = `
+          <div class="row">
+            <div style="flex:1">
+              <label for="subject">Subject</label>
+              <input id="subject" type="text" placeholder="E.g. Mathematics" />
+            </div>
+          </div>`;
+      }
+    }
+
+    function createPersonObject(obj) {
+      if (obj.type === 'Student') return new Student(obj.id, obj.name, obj.age, obj.grade);
+      if (obj.type === 'Teacher') return new Teacher(obj.id, obj.name, obj.age, obj.subject);
+      return new Person(obj.id, obj.name, obj.age);
+    }
+
+    function renderPeople(filter = '') {
+      peopleList.innerHTML = '';
+      const filtered = people.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+
+      countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'person' : 'people'}`;
+
+      if (filtered.length === 0) {
+        peopleList.innerHTML = '<div style="color:var(--muted);padding:20px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbfe);">No people found — add someone using the form.</div>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const container = document.createElement('div');
+        container.className = 'card-person';
+
+        const left = document.createElement('div');
+        left.className = 'meta';
+        const role = document.createElement('div');
+        role.className = 'role';
+        role.textContent = p.name;
+
+        const sub = document.createElement('div');
+        sub.className = 'age';
+        let extra = '';
+        if (p instanceof Student) extra = ` • Grade: ${p.grade}`;
+        if (p instanceof Teacher) extra = ` • Subject: ${p.subject}`;
+        sub.textContent = `Age: ${p.age}${extra}`;
+
+        left.appendChild(role);
+        left.appendChild(sub);
+
+        const right = document.createElement('div');
+        right.className = 'actions';
+
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + (p instanceof Student ? 'student' : p instanceof Teacher ? 'teacher' : '');
+        badge.textContent = p instanceof Student ? 'Student' : p instanceof Teacher ? 'Teacher' : 'Person';
+
+        const btnIntro = document.createElement('button');
+        btnIntro.className = 'ghost';
+        btnIntro.textContent = 'Introduce()';
+        btnIntro.addEventListener('click', () => {
+          log(p.introduce());
+        });
+
+        right.appendChild(badge);
+        right.appendChild(btnIntro);
+
+        if (p instanceof Student) {
+          const btnStudy = document.createElement('button');
+          btnStudy.textContent = 'study()';
+          btnStudy.addEventListener('click', () => log(p.study()));
+          right.appendChild(btnStudy);
+        }
+
+        if (p instanceof Teacher) {
+          const btnTeach = document.createElement('button');
+          btnTeach.textContent = 'teach()';
+          btnTeach.addEventListener('click', () => log(p.teach()));
+          right.appendChild(btnTeach);
+        }
+
+        const btnRemove = document.createElement('button');
+        btnRemove.textContent = 'Remove';
+        btnRemove.className = 'danger';
+        btnRemove.addEventListener('click', () => {
+          if (confirm(`Remove ${p.name}?`)) {
+            people = people.filter(x => x.id !== p.id);
+            save();
+            renderPeople(searchEl.value);
+            log(`${p.name} removed.`);
+          }
+        });
+
+        right.appendChild(btnRemove);
+
+        container.appendChild(left);
+        container.appendChild(right);
+
+        peopleList.appendChild(container);
+      });
+    }
+
+    /***** Event wiring *****/
+    typeEl.addEventListener('change', renderExtraFields);
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const type = typeEl.value;
+      const name = nameEl.value.trim();
+      const age = ageEl.value;
+      if (!name) return alert('Please provide a name.');
+      if (!age || Number(age) <= 0) return alert('Please provide a valid age.');
+
+      const id = uid('p_');
+      let obj;
+      if (type === 'Student') {
+        const grade = (document.getElementById('grade') || {}).value || 'N/A';
+        obj = new Student(id, name, age, grade);
+      } else if (type === 'Teacher') {
+        const subject = (document.getElementById('subject') || {}).value || 'General';
+        obj = new Teacher(id, name, age, subject);
+      } else {
+        obj = new Person(id, name, age);
+      }
+
+      people.push(obj);
+      save();
+      renderPeople(searchEl.value);
+      log(`${obj.name} added (${type}).`);
+
+      // reset form fields
+      form.reset();
+      renderExtraFields();
+    });
+
+    document.getElementById('seed').addEventListener('click', () => {
+      const samples = [
+        { type: 'Student', name: 'Alice', age: 16, grade: '10' },
+        { type: 'Teacher', name: 'Mr. Smith', age: 40, subject: 'Mathematics' },
+        { type: 'Person', name: 'Taylor', age: 28 }
+      ];
+      samples.forEach(s => people.push(createPersonObject({ ...s, id: uid('p_') })));
+      save();
+      renderPeople(searchEl.value);
+      log('Sample data added.');
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      if (!confirm('Clear all data?')) return;
+      people = [];
+      save();
+      renderPeople(searchEl.value);
+      log('All data cleared.');
+    });
+
+    searchEl.addEventListener('input', () => renderPeople(searchEl.value));
+
+    // load and initial render
+    load();
+    renderExtraFields();
+    renderPeople();
+    log('App ready.');
   </script>
 </body>
 </html>
