@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Person Class Hierarchy</title>
+</head>
+<body>
+  <h2>Person Class Hierarchy Demo</h2>
+  <pre id="output"></pre>
+
+  <script>
+    // Base class
+    class Person {
+      constructor(name, age) {
+        this.name = name;
+        this.age = age;
+      }
+
+      introduce() {
+        return `Hi, I'm ${this.name}, ${this.age} years old.`;
+      }
+    }
+
+    // Student subclass
+    class Student extends Person {
+      constructor(name, age, grade) {
+        super(name, age); // call parent constructor
+        this.grade = grade;
+      }
+
+      study() {
+        return `${this.name} is studying for grade ${this.grade}.`;
+      }
+
+      introduce() {
+        return super.introduce() + ` I am a student in grade ${this.grade}.`;
+      }
+    }
+
+    // Teacher subclass
+    class Teacher extends Person {
+      constructor(name, age, subject) {
+        super(name, age);
+        this.subject = subject;
+      }
+
+      teach() {
+        return `${this.name} is teaching ${this.subject}.`;
+      }
+
+      introduce() {
+        return super.introduce() + ` I teach ${this.subject}.`;
+      }
+    }
+
+    // Example usage
+    const output = document.getElementById("output");
+
+    const student1 = new Student("Alice", 16, "10th");
+    const teacher1 = new Teacher("Mr. Smith", 40, "Mathematics");
+
+    let text = "";
+    text += student1.introduce() + "\\n";
+    text += student1.study() + "\\n\\n";
+    text += teacher1.introduce() + "\\n";
+    text += teacher1.teach();
+
+    output.textContent = text;
+  </script>
+</body>
+</html>
